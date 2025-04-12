@@ -6,7 +6,7 @@ import pyray
 import sys
 import numpy as np
 
-def play_random(env_name="platformer_v1", fps=30):
+def play_random(env_name="platformer_v2", fps=30):
     """Run the environment with random actions."""
     make_env = env_creator(env_name)
     env = make_env()
@@ -19,7 +19,7 @@ def play_random(env_name="platformer_v1", fps=30):
     while True:
         start_time = time.time()
         
-        action = env.action_space.sample()
+        # action = env.action_space.sample()
         action = 2
         ob, reward, done, truncated, info = env.step(action)
 
