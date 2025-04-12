@@ -1,31 +1,31 @@
-'''High-perf Pong
+'''Simple Platformer Environment
 
-Inspired from https://gist.github.com/Yttrmin/18ecc3d2d68b407b4be1
-& https://jair.org/index.php/jair/article/view/10819/25823
-& https://www.youtube.com/watch?v=PSQt5KGv7Vk
+A 2D platformer game where the player jumps between platforms to collect coins.
 '''
 
 import numpy as np
 import gymnasium
 
 import pufferlib
-from pufferlib.ocean.connect4.cy_connect4 import CyConnect4
+from pufferlib.ocean.platformer.cy_platformer import CyPlatformer
 
 
-class Connect4(pufferlib.PufferEnv):
+class Platformer(pufferlib.PufferEnv):
     def __init__(self, seed=None, num_envs=1, render_mode=None, report_interval=128,
-             width=672, height=576, piece_width=96, piece_height=96, buf=None):
+             width=800, height=600, player_width=30, player_height=50, buf=None):
 
+        # 12 observations: player (x,y,vx,vy) + 5 platforms (x,y)
         self.single_observation_space = gymnasium.spaces.Box(low=0, high=1,
-            shape=(42,), dtype=np.float32)
-        self.single_action_space = gymnasium.spaces.Discrete(7)
+            shape=(12,), dtype=np.float32)
+        # 4 actions: left, right, jump, no action
+        self.single_action_space = gymnasium.spaces.Discrete(4)
         self.report_interval = report_interval
         self.render_mode = render_mode
         self.num_agents = num_envs
 
         super().__init__(buf=buf)
-        self.c_envs = CyConnect4(self.observations, self.actions, self.rewards,
-            self.terminals, num_envs, width, height, piece_width, piece_height)
+        self.c_envs = CyPlatformer(self.observations, self.actions, self.rewards,
+            self.terminals, num_envs, width, height, player_width, player_height)
 
     def reset(self, seed=None):
         self.c_envs.reset()
@@ -56,13 +56,13 @@ class Connect4(pufferlib.PufferEnv):
 def test_performance(timeout=10, atn_cache=1024, num_envs=1024):
     import time
 
-    env = Connect4(num_envs=num_envs)
-    env.reset(0)
+    env = Platformer(num_envs=num_envs)
+    env.reset()
     tick = 0
 
     actions = np.random.randint(
         0,
-        env.single_action_space.n + 1,
+        env.single_action_space.n,
         (atn_cache, num_envs),
     )
 
@@ -76,4 +76,4 @@ def test_performance(timeout=10, atn_cache=1024, num_envs=1024):
 
 
 if __name__ == '__main__':
-    test_performance()
+    test_performance() 

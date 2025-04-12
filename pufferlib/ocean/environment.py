@@ -128,6 +128,7 @@ MAKE_FNS = {
     'squared':       lambda: lazy_import('pufferlib.ocean.squared.squared', 'Squared'),
     'pysquared':     lambda: lazy_import('pufferlib.ocean.squared.pysquared', 'PySquared'),
     'connect4':      lambda: lazy_import('pufferlib.ocean.connect4.connect4', 'Connect4'),
+    'platformer':     lambda: lazy_import('pufferlib.ocean.platformer.platformer', 'Platformer'),
     'tripletriad':   lambda: lazy_import('pufferlib.ocean.tripletriad.tripletriad', 'TripleTriad'),
     'tactical':      lambda: lazy_import('pufferlib.ocean.tactical.tactical', 'Tactical'),
     'go':            lambda: lazy_import('pufferlib.ocean.go.go', 'Go'),

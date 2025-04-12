@@ -290,7 +290,11 @@ class Multiprocessing:
 
         from multiprocessing import RawArray, set_start_method
         # Mac breaks without setting fork
-        set_start_method('fork')
+        try:
+            set_start_method('fork')
+        except RuntimeError:
+            # Context has already been set, ignore this error
+            pass
         self.shm = namespace(
             observations=RawArray(obs_ctype, num_agents * int(np.prod(obs_shape))),
             actions=RawArray(atn_ctype, num_agents * int(np.prod(atn_shape))),
