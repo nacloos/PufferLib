@@ -260,7 +260,7 @@ void c_reset(CPlatformer* env) {
     env->player_height = 50;
     env->on_ground = false;
     env->tick = 0;
-    env->max_ticks = 10000;
+    env->max_ticks = 1000;
     env->rewards[0] = 0;
     env->dones[0] = NOT_DONE;
     env->state = PLAYING;

@@ -6,40 +6,57 @@ cdef extern from "platformer.h":
     int LOG_BUFFER_SIZE
 
     ctypedef struct Log:
-        float episode_return;
-        float episode_length;
-        float score;
+        float episode_return
+        float episode_length
+        float success_rate
 
     ctypedef struct LogBuffer
     LogBuffer* allocate_logbuffer(int)
     void free_logbuffer(LogBuffer*)
     Log aggregate_and_clear(LogBuffer*)
 
+    ctypedef struct Player:
+        float x
+        float y
+        float vel_x
+        float vel_y
+        int width
+        int height
+        int on_ground
+
+    ctypedef struct Goal:
+        float x
+        float y
+        int width
+        int height
+
+    ctypedef struct Platform:
+        float x
+        float y
+        int width
+        int height
+
     ctypedef struct CPlatformer:
         float* observations
         int* actions
         float* rewards
         unsigned char* dones
-        LogBuffer* log_buffer;
-        Log log;
-
-        float player_x;
-        float player_y;
-        float player_vx;
-        float player_vy;
-        float player_width;
-        float player_height;
-        bint on_ground;
+        LogBuffer* log_buffer
+        Log log
         
-        int tick;
-        int max_ticks;
+        Player player
+        Goal goal
+        Platform ground
         
-        int width;
-        int height;
+        int steps
+        float episode_return
+        
+        int screen_width
+        int screen_height
 
     ctypedef struct Client
     void free_cplatformer(CPlatformer* env)
-    Client* make_client(float width, float height)
+    Client* make_client(int width, int height)
     void close_client(Client* client)
     void c_render(Client* client, CPlatformer* env)
     void c_reset(CPlatformer* env)
@@ -54,7 +71,7 @@ cdef class CyPlatformer:
 
     def __init__(self, float[:, :] observations, int[:] actions,
             float[:] rewards, unsigned char[:] terminals, int num_envs,
-            int width, int height, int player_width, int player_height):
+            int width, int height, int player_size):
 
         self.num_envs = num_envs
         self.client = NULL
@@ -69,17 +86,31 @@ cdef class CyPlatformer:
                 rewards=&rewards[i],
                 dones=&terminals[i],
                 log_buffer=self.logs,
-                player_x=0,
-                player_y=0,
-                player_vx=0,
-                player_vy=0,
-                player_width=player_width,
-                player_height=player_height,
-                on_ground=False,
-                tick=0,
-                max_ticks=1000,
-                width=width,
-                height=height,
+                player=Player(
+                    x=50,
+                    y=height - player_size - 20,
+                    vel_x=0,
+                    vel_y=0,
+                    width=player_size,
+                    height=player_size,
+                    on_ground=1
+                ),
+                goal=Goal(
+                    x=width - 100,
+                    y=height - player_size - 20,
+                    width=player_size,
+                    height=player_size
+                ),
+                ground=Platform(
+                    x=0,
+                    y=height - 20,
+                    width=width,
+                    height=20
+                ),
+                steps=0,
+                episode_return=0,
+                screen_width=width,
+                screen_height=height
             )
 
     def reset(self):
@@ -98,7 +129,7 @@ cdef class CyPlatformer:
             import os
             cwd = os.getcwd()
             os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-            self.client = make_client(env.width, env.height)
+            self.client = make_client(env.screen_width, env.screen_height)
             os.chdir(cwd)
 
         c_render(self.client, env)
@@ -108,10 +139,13 @@ cdef class CyPlatformer:
             close_client(self.client)
             self.client = NULL
 
-        free(self.envs)
+        # Free resources
+        free_cplatformer(self.envs)
 
     def log(self):
         cdef Log log = aggregate_and_clear(self.logs)
-        return {'episode_return': log.episode_return, 
-                'episode_length': log.episode_length,
-                'score': log.score} 
+        return {
+            'episode_return': log.episode_return,
+            'episode_length': log.episode_length,
+            'success_rate': log.success_rate
+        } 

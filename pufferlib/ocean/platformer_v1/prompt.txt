@@ -1,0 +1,7 @@
+1. Carefully read the code in the provided folder.
+2. Write a plan to implement a minimalistic platformer game that closely follows the structure of the provided environment. The platformer game should just have a ground platformer, a player, and a goal. The reward is simply +1 when the player reaches the goal and 0 if the number of steps exceeds 1000. The observations should be entire state of the env (should be Markov). The actions are noop, left, right, jump.
+3. Implement the env in a folder called platformer_v1
+
+
+TODO: seem that log were not reset properly in the generated platformer.h
+

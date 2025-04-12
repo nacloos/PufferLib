@@ -278,6 +278,7 @@ extension_paths = [
     'pufferlib/ocean/cpr/cy_cpr',
     'pufferlib/ocean/tower_climb/cy_tower_climb',
     'pufferlib/ocean/platformer/cy_platformer',
+    'pufferlib/ocean/platformer_v1/cy_platformer',
 ]
 
 system = platform.system()
